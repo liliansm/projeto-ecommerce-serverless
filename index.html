@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Serverless</title>
+    <link rel="icon" href="data:,">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f2f5f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #556b2f;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #6b5e4a;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid #d2d2c9;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            background: #f9f9f7;
+            color: #333;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #556b2f;
+            box-shadow: 0 0 8px rgba(85,107,47,0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6b8e23, #a2b27f); /* verde/marrom elegante */
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #a2b27f, #6b8e23);
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(85,107,47,0.3);
+        }
+
+        #response {
+            margin-top: 1.8rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background-color: #f0f2eb;
+            color: #556b2f;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simulador de Pedido</h1>
+        <form id="orderForm">
+            <div class="form-group">
+                <label for="produto_id">ID do Produto:</label>
+                <input type="text" id="produto_id" value="prod-007" required>
+            </div>
+            <div class="form-group">
+                <label for="quantidade">Quantidade:</label>
+                <input type="number" id="quantidade" value="1" required>
+            </div>
+            <div class="form-group">
+                <label for="cartao_credito">Cartão de Crédito (simulação):</label>
+                <input type="text" id="cartao_credito" value="1234-5678-9012-3456" required>
+            </div>
+            <button type="submit">Enviar Pedido</button>
+        </form>
+        <div id="response">Aguardando envio...</div>
+    </div>
+
+    <script>
+        const apiUrl = 'https://jdjuebj1l7.execute-api.us-east-1.amazonaws.com/default/processar-pedido-ecommerce';
+        const orderForm = document.getElementById('orderForm');
+        const responseDiv = document.getElementById('response');
+
+        orderForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            responseDiv.style.color = '#556b2f';
+            responseDiv.textContent = 'Processando...';
+
+            const data = {
+                produto_id: document.getElementById('produto_id').value,
+                quantidade: parseInt(document.getElementById('quantidade').value),
+                cartao_credito: document.getElementById('cartao_credito').value
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                responseDiv.style.color = response.ok ? '#556b2f' : '#c44d3f';
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+
+            } catch (error) {
+                responseDiv.style.color = '#c44d3f';
+                responseDiv.textContent = 'Erro de conexão. Verifique a Lambda, API Gateway e abra em localhost.';
+                console.error('Erro de fetch:', error);
+            }
+        });
+    </script>
+</body>
+</html>
